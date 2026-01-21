@@ -1,6 +1,6 @@
 <p align="center">
   <img src="docs/banner.png" alt="SchemaSentry Banner" width="100%">
-</p>
+</p> 
 
 # 🛡️ SchemaSentry - Smart API Contract Guardian
 
