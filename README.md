@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/banner.png" alt="SchemaSentry Banner" width="100%">
+</p>
+
 # 🛡️ SchemaSentry - Smart API Contract Guardian
 
 **Detect breaking API changes before clients do.**
