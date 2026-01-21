@@ -1,0 +1,169 @@
+openapi: 3.0.3
+info:
+  title: Patient API
+  description: Sample healthcare API for SchemaSentry testing
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+
+paths:
+  /patients:
+    get:
+      summary: List all patients
+      operationId: listPatients
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Patient'
+    post:
+      summary: Create a patient
+      operationId: createPatient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientCreate'
+      responses:
+        '201':
+          description: Patient created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+
+  /patients/{id}:
+    get:
+      summary: Get a patient by ID
+      operationId: getPatient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+        '404':
+          description: Patient not found
+
+  /eligibility:
+    get:
+      summary: Check patient eligibility
+      operationId: checkEligibility
+      parameters:
+        - name: patient_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Eligibility status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibilityResponse'
+
+components:
+  schemas:
+    Patient:
+      type: object
+      required:
+        - id
+        - name
+        - date_of_birth
+      properties:
+        id:
+          type: string
+          description: Unique patient identifier
+        name:
+          type: string
+          description: Full patient name
+        date_of_birth:
+          type: string
+          format: date
+          description: Patient's date of birth
+        email:
+          type: string
+          format: email
+          description: Patient's email address
+        phone:
+          type: string
+          description: Patient's phone number
+        insurance:
+          $ref: '#/components/schemas/Insurance'
+        created_at:
+          type: string
+          format: date-time
+          description: When the patient record was created
+
+    PatientCreate:
+      type: object
+      required:
+        - name
+        - date_of_birth
+      properties:
+        name:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        insurance_id:
+          type: string
+
+    Insurance:
+      type: object
+      properties:
+        provider:
+          type: string
+          description: Insurance provider name
+        policy_number:
+          type: string
+          description: Policy number
+        group_number:
+          type: string
+          description: Group number
+
+    EligibilityResponse:
+      type: object
+      required:
+        - patient_id
+        - eligible
+        - coverage_status
+      properties:
+        patient_id:
+          type: string
+        eligible:
+          type: boolean
+        coverage_status:
+          type: string
+          enum: [active, inactive, pending, expired]
+        coverage_details:
+          type: object
+          properties:
+            deductible:
+              type: number
+            copay:
+              type: number
+            coinsurance:
+              type: number
+        checked_at:
+          type: string
+          format: date-time

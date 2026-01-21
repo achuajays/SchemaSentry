@@ -1,0 +1,150 @@
+{
+    "traffic": [
+        {
+            "endpoint": "/patients",
+            "method": "GET",
+            "status_code": 200,
+            "response_body": [
+                {
+                    "id": "pat-001",
+                    "name": "John Doe",
+                    "date_of_birth": "1985-03-15",
+                    "email": "john.doe@email.com",
+                    "insurance": {
+                        "provider": "BlueCross",
+                        "policy_number": "BC123456"
+                    },
+                    "created_at": "2024-01-15T10:30:00Z"
+                }
+            ],
+            "client_id": "frontend-app",
+            "timestamp": "2024-01-20T14:30:00Z"
+        },
+        {
+            "endpoint": "/patients",
+            "method": "POST",
+            "status_code": 201,
+            "request_body": {
+                "name": "Jane Smith",
+                "date_of_birth": "1990-07-22"
+            },
+            "response_body": {
+                "id": "pat-002",
+                "name": "Jane Smith",
+                "date_of_birth": "1990-07-22",
+                "insurance": null,
+                "created_at": "2024-01-20T15:00:00Z"
+            },
+            "client_id": "mobile-app",
+            "timestamp": "2024-01-20T15:00:00Z"
+        },
+        {
+            "endpoint": "/patients/pat-001",
+            "method": "GET",
+            "status_code": 200,
+            "response_body": {
+                "id": "pat-001",
+                "name": "John Doe",
+                "date_of_birth": "1985-03-15",
+                "email": "john.doe@email.com",
+                "phone": "555-123-4567",
+                "insurance": {
+                    "provider": "BlueCross",
+                    "policy_number": "BC123456",
+                    "group_number": "GRP789"
+                }
+            },
+            "client_id": "billing-service",
+            "timestamp": "2024-01-20T16:00:00Z"
+        },
+        {
+            "endpoint": "/eligibility",
+            "method": "GET",
+            "status_code": 200,
+            "response_body": {
+                "patient_id": "pat-001",
+                "eligible": true,
+                "coverage_details": {
+                    "deductible": 500,
+                    "copay": 25
+                }
+            },
+            "client_id": "billing-service",
+            "timestamp": "2024-01-20T16:30:00Z"
+        },
+        {
+            "endpoint": "/eligibility",
+            "method": "GET",
+            "status_code": 200,
+            "response_body": {
+                "patient_id": "pat-002",
+                "eligible": false,
+                "coverage_status": "inactive"
+            },
+            "client_id": "frontend-app",
+            "timestamp": "2024-01-20T17:00:00Z"
+        },
+        {
+            "endpoint": "/eligibility",
+            "method": "GET",
+            "status_code": 200,
+            "response_body": {
+                "patient_id": "pat-003",
+                "eligible": true
+            },
+            "client_id": "mobile-app",
+            "timestamp": "2024-01-20T17:30:00Z"
+        }
+    ],
+    "client_logs": [
+        {
+            "client_id": "frontend-app",
+            "endpoint": "/patients",
+            "method": "GET",
+            "count": 1523,
+            "timestamp": "2024-01-20T23:59:59Z"
+        },
+        {
+            "client_id": "frontend-app",
+            "endpoint": "/eligibility",
+            "method": "GET",
+            "count": 892,
+            "timestamp": "2024-01-20T23:59:59Z"
+        },
+        {
+            "client_id": "mobile-app",
+            "endpoint": "/patients",
+            "method": "POST",
+            "count": 234,
+            "timestamp": "2024-01-20T23:59:59Z"
+        },
+        {
+            "client_id": "mobile-app",
+            "endpoint": "/eligibility",
+            "method": "GET",
+            "count": 567,
+            "timestamp": "2024-01-20T23:59:59Z"
+        },
+        {
+            "client_id": "billing-service",
+            "endpoint": "/patients/{id}",
+            "method": "GET",
+            "count": 3421,
+            "timestamp": "2024-01-20T23:59:59Z"
+        },
+        {
+            "client_id": "billing-service",
+            "endpoint": "/eligibility",
+            "method": "GET",
+            "count": 2891,
+            "timestamp": "2024-01-20T23:59:59Z"
+        },
+        {
+            "client_id": "internal-admin",
+            "endpoint": "/patients",
+            "method": "GET",
+            "count": 89,
+            "timestamp": "2024-01-20T23:59:59Z"
+        }
+    ]
+}

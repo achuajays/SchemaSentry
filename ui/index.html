@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchemaSentry - Smart API Contract Guardian</title>
+    <meta name="description" content="Detect breaking API changes before clients do.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">🛡️</div>
+                <div class="logo-text">
+                    <h1>SchemaSentry</h1>
+                    <span class="tagline">Smart API Contract Guardian</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="status-pill" id="apiStatus">
+                    <span class="status-dot"></span>
+                    <span>Checking...</span>
+                </div>
+                <button class="btn btn-primary" onclick="refreshDashboard()">
+                    <span>↻</span> Refresh
+                </button>
+            </div>
+        </header>
+
+        <!-- Health Score Card -->
+        <section class="health-section">
+            <div class="health-card glass-card">
+                <div class="health-score" id="healthScore">
+                    <svg viewBox="0 0 36 36" class="circular-chart">
+                        <path class="circle-bg" d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="circle" id="healthCircle" stroke-dasharray="100, 100" d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <text x="18" y="20.35" class="score-text" id="healthScoreText">--</text>
+                    </svg>
+                </div>
+                <div class="health-info">
+                    <h2>API Contract Health</h2>
+                    <p class="health-status" id="healthStatus">Analyzing your API contracts...</p>
+                    <div class="health-meta">
+                        <span id="lastUpdated">Last updated: --</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Grid -->
+        <section class="stats-grid">
+            <div class="stat-card glass-card">
+                <div class="stat-icon critical">⚠️</div>
+                <div class="stat-content">
+                    <span class="stat-value" id="criticalCount">0</span>
+                    <span class="stat-label">Critical Issues</span>
+                </div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-icon high">🔴</div>
+                <div class="stat-content">
+                    <span class="stat-value" id="highRiskCount">0</span>
+                    <span class="stat-label">High Risk</span>
+                </div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-icon endpoints">📡</div>
+                <div class="stat-content">
+                    <span class="stat-value" id="endpointCount">0</span>
+                    <span class="stat-label">Endpoints Analyzed</span>
+                </div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-icon clients">👥</div>
+                <div class="stat-content">
+                    <span class="stat-value" id="clientCount">0</span>
+                    <span class="stat-label">Clients Tracked</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Recent Issues Panel -->
+            <section class="issues-panel glass-card">
+                <div class="panel-header">
+                    <h3>🔍 Recent Issues</h3>
+                    <button class="btn btn-ghost" onclick="toggleIssueView()">View All</button>
+                </div>
+                <div class="issues-list" id="issuesList">
+                    <div class="empty-state">
+                        <span class="empty-icon">✨</span>
+                        <p>No issues detected yet</p>
+                        <span class="empty-hint">Run an analysis to see results</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Client Impact Panel -->
+            <section class="impact-panel glass-card">
+                <div class="panel-header">
+                    <h3>💥 Client Impact</h3>
+                </div>
+                <div class="impact-chart" id="impactChart">
+                    <div class="empty-state">
+                        <span class="empty-icon">📊</span>
+                        <p>No client data available</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Quick Actions -->
+        <section class="actions-section">
+            <div class="glass-card actions-card">
+                <h3>⚡ Quick Actions</h3>
+                <div class="actions-grid">
+                    <button class="action-btn" onclick="showAnalyzeModal()">
+                        <span class="action-icon">🔬</span>
+                        <span class="action-label">Run Analysis</span>
+                    </button>
+                    <button class="action-btn" onclick="window.open('/docs', '_blank')">
+                        <span class="action-icon">📖</span>
+                        <span class="action-label">API Docs</span>
+                    </button>
+                    <button class="action-btn" onclick="exportReport()">
+                        <span class="action-icon">📥</span>
+                        <span class="action-label">Export Report</span>
+                    </button>
+                    <button class="action-btn" onclick="showSettings()">
+                        <span class="action-icon">⚙️</span>
+                        <span class="action-label">Settings</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Modal -->
+        <div class="modal" id="analyzeModal">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h3>🔬 Run Contract Analysis</h3>
+                    <button class="modal-close" onclick="hideAnalyzeModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>OpenAPI Spec (YAML/JSON)</label>
+                        <textarea id="openapiSpec" placeholder="Paste your OpenAPI specification here..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Traffic Data (JSON array)</label>
+                        <textarea id="trafficData"
+                            placeholder='[{"endpoint": "/users", "method": "GET", "status_code": 200, "response_body": {...}}]'></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Client Logs (JSON array)</label>
+                        <textarea id="clientLogs"
+                            placeholder='[{"client_id": "frontend-app", "endpoint": "/users", "method": "GET"}]'></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Endpoint</label>
+                            <input type="text" id="endpoint" placeholder="/users">
+                        </div>
+                        <div class="form-group half">
+                            <label>Method</label>
+                            <select id="method">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                                <option value="PUT">PUT</option>
+                                <option value="PATCH">PATCH</option>
+                                <option value="DELETE">DELETE</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" onclick="hideAnalyzeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="runAnalysis()">
+                        <span id="analyzeSpinner" class="spinner hidden"></span>
+                        Run Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>SchemaSentry v1.0.0 • Powered by smolagents + Groq</p>
+        </footer>
+    </div>
+
+    <script>
+        // API base URL
+        const API_BASE = '';
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            checkApiStatus();
+            refreshDashboard();
+            setInterval(refreshDashboard, 30000); // Refresh every 30s
+        });
+
+        // Check API health
+        async function checkApiStatus() {
+            const statusEl = document.getElementById('apiStatus');
+            try {
+                const res = await fetch(`${API_BASE}/health`);
+                if (res.ok) {
+                    statusEl.innerHTML = '<span class="status-dot online"></span><span>Online</span>';
+                    statusEl.classList.add('online');
+                } else {
+                    throw new Error('API unhealthy');
+                }
+            } catch (e) {
+                statusEl.innerHTML = '<span class="status-dot offline"></span><span>Offline</span>';
+                statusEl.classList.add('offline');
+            }
+        }
+
+        // Refresh dashboard data
+        async function refreshDashboard() {
+            try {
+                const res = await fetch(`${API_BASE}/api/dashboard-data`);
+                if (!res.ok) throw new Error('Failed to fetch dashboard data');
+
+                const data = await res.json();
+                updateDashboard(data);
+            } catch (e) {
+                console.error('Dashboard refresh failed:', e);
+            }
+        }
+
+        // Update dashboard with data
+        function updateDashboard(data) {
+            // Health score
+            const score = data.health_score || 100;
+            const scoreText = document.getElementById('healthScoreText');
+            const scoreCircle = document.getElementById('healthCircle');
+            const healthStatus = document.getElementById('healthStatus');
+
+            scoreText.textContent = Math.round(score);
+            scoreCircle.style.strokeDasharray = `${score}, 100`;
+            scoreCircle.style.stroke = score > 80 ? '#10b981' : score > 50 ? '#f59e0b' : '#ef4444';
+
+            if (score >= 90) {
+                healthStatus.textContent = 'Excellent! Your API contracts are healthy.';
+            } else if (score >= 70) {
+                healthStatus.textContent = 'Good, but some issues need attention.';
+            } else if (score >= 50) {
+                healthStatus.textContent = 'Warning: Multiple issues detected.';
+            } else {
+                healthStatus.textContent = 'Critical: Immediate action required!';
+            }
+
+            // Stats
+            document.getElementById('criticalCount').textContent = data.critical_issues || 0;
+            document.getElementById('highRiskCount').textContent = data.high_risk_issues || 0;
+            document.getElementById('endpointCount').textContent = data.total_endpoints || 0;
+            document.getElementById('clientCount').textContent = Object.keys(data.client_impact || {}).length;
+
+            // Last updated
+            document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+
+            // Recent issues
+            updateIssuesList(data.recent_issues || []);
+
+            // Client impact
+            updateImpactChart(data.client_impact || {});
+        }
+
+        // Update issues list
+        function updateIssuesList(issues) {
+            const container = document.getElementById('issuesList');
+
+            if (!issues.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">✨</span>
+                        <p>No issues detected yet</p>
+                        <span class="empty-hint">Run an analysis to see results</span>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = issues.map(issue => `
+                <div class="issue-item ${(issue.risk || 'medium').toLowerCase()}">
+                    <div class="issue-badge ${(issue.risk || 'medium').toLowerCase()}">${issue.risk || 'MEDIUM'}</div>
+                    <div class="issue-details">
+                        <span class="issue-type">${issue.issue_type || 'Unknown'}</span>
+                        <span class="issue-endpoint">${issue.method || 'GET'} ${issue.endpoint || '/unknown'}</span>
+                        <p class="issue-detail">${issue.detail || 'No details available'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update impact chart
+        function updateImpactChart(clientImpact) {
+            const container = document.getElementById('impactChart');
+            const clients = Object.entries(clientImpact);
+
+            if (!clients.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">📊</span>
+                        <p>No client data available</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const max = Math.max(...clients.map(([_, v]) => v));
+            container.innerHTML = clients.map(([client, count]) => `
+                <div class="impact-bar">
+                    <span class="impact-label">${client}</span>
+                    <div class="impact-bar-track">
+                        <div class="impact-bar-fill" style="width: ${(count / max) * 100}%"></div>
+                    </div>
+                    <span class="impact-count">${count}</span>
+                </div>
+            `).join('');
+        }
+
+        // Show analyze modal
+        function showAnalyzeModal() {
+            document.getElementById('analyzeModal').classList.add('show');
+        }
+
+        // Hide analyze modal
+        function hideAnalyzeModal() {
+            document.getElementById('analyzeModal').classList.remove('show');
+        }
+
+        // Run analysis
+        async function runAnalysis() {
+            const spinner = document.getElementById('analyzeSpinner');
+            spinner.classList.remove('hidden');
+
+            try {
+                const requestBody = {
+                    traffic_data: JSON.parse(document.getElementById('trafficData').value || '[]'),
+                    openapi_spec: document.getElementById('openapiSpec').value,
+                    client_logs: JSON.parse(document.getElementById('clientLogs').value || '[]'),
+                    endpoint: document.getElementById('endpoint').value,
+                    method: document.getElementById('method').value,
+                    sample_rate: 0.1
+                };
+
+                const res = await fetch(`${API_BASE}/api/report`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.detail || 'Analysis failed');
+                }
+
+                const result = await res.json();
+                alert(`Analysis complete! Report ID: ${result.report_id}\n\nIssues found: ${result.summary.total_issues}\nCritical: ${result.summary.critical_issues}`);
+
+                hideAnalyzeModal();
+                refreshDashboard();
+            } catch (e) {
+                alert(`Error: ${e.message}`);
+            } finally {
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // Export report
+        async function exportReport() {
+            try {
+                const res = await fetch(`${API_BASE}/api/issues`);
+                const data = await res.json();
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `schemasentry-report-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert('Failed to export report');
+            }
+        }
+
+        // Toggle issue view
+        function toggleIssueView() {
+            window.open('/api/issues', '_blank');
+        }
+
+        // Show settings
+        function showSettings() {
+            alert('Settings panel coming soon!');
+        }
+    </script>
+</body>
+
+</html>
